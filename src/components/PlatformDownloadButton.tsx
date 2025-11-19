@@ -72,26 +72,10 @@ const platforms: Record<string, Platform> = {
   }
 };
 
-function detectPlatform(): string {
-  if (typeof window === 'undefined') return 'mac';
-  
-  const userAgent = window.navigator.userAgent.toLowerCase();
-  
-  if (userAgent.includes('mac')) return 'mac';
-  if (userAgent.includes('android')) return 'android';
-  if (userAgent.includes('windows') || userAgent.includes('win32') || userAgent.includes('win64')) return 'windows';
-  if (userAgent.includes('iphone') || userAgent.includes('ipad')) return 'ios';
-  if (userAgent.includes('linux')) return 'linux';
-  
-  return 'mac';
-}
-
 export default function PlatformDownloadButton() {
-  const [currentPlatform, setCurrentPlatform] = useState<string>('mac');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setCurrentPlatform(detectPlatform());
     setMounted(true);
   }, []);
 
@@ -99,28 +83,35 @@ export default function PlatformDownloadButton() {
     return null;
   }
 
-  const platform = platforms[currentPlatform];
   const baseClasses = "rounded-full px-4 md:px-6 py-2 md:py-3 font-medium transition ease-in-out duration-500 flex items-center gap-2 text-sm md:text-base justify-center";
   
-  if (platform.available) {
-    return (
-      <a
-        href={platform.href}
-        className={`${baseClasses} bg-black text-white hover:bg-black/80`}
-      >
-        {platform.icon}
-        {platform.name}
-      </a>
-    );
-  }
-
   return (
-    <button
-      className={`${baseClasses} bg-gray-400 text-white cursor-not-allowed`}
-      disabled
-    >
-      {platform.icon}
-      {platform.name}
-    </button>
+    <>
+      {Object.values(platforms).map((platform, index) => {
+        if (platform.available) {
+          return (
+            <a
+              key={index}
+              href={platform.href}
+              className={`${baseClasses} bg-black text-white hover:bg-black/80`}
+            >
+              {platform.icon}
+              {platform.name}
+            </a>
+          );
+        }
+
+        return (
+          <button
+            key={index}
+            className={`${baseClasses} bg-gray-400 text-white cursor-not-allowed`}
+            disabled
+          >
+            {platform.icon}
+            {platform.name}
+          </button>
+        );
+      })}
+    </>
   );
 }
